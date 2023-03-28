@@ -1,0 +1,19 @@
+{
+  "name": "nick-space",
+  "version": "0.0.0",
+  "keywords": [
+    "vite"
+  ],
+  "author": "Nick Garbalau",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^2.3.0"
+  },
+  "dependencies": {
+    "three": "^0.128.0"
+  }
+}
