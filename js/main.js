@@ -1,9 +1,37 @@
-import '../css/style.css';
 import * as THREE from 'three';
+import { getRandomColor } from './utils/getRandomColor.js';
+import { LIGHT_COLOR } from './constants/index.js';
 
-// Global Variables
-const TORUS_COLOR = 0xff6347;
-const STAR_COLOR = 0xffffff;
+const contents = document.querySelector('#contents');
+const loader = document.querySelector('#load');
+const canvas = document.querySelector('#canvas-background');
+const button = document.querySelector('button');
+
+// Background Setup
+let isBackground = false;
+const spaceTexture = new THREE.TextureLoader().load('/images/space.jpg');
+
+// Button Event Listener (toggle background)
+button.addEventListener('click', () => {
+  isBackground = !isBackground;
+  if (isBackground) {
+    scene.background = spaceTexture;
+  } else {
+    scene.background = null;
+  }
+});
+
+document.onreadystatechange = () => {
+  if (document.readyState == 'interactive') {
+    contents.style.visibility = 'hidden';
+  }
+  if (document.readyState == 'complete') {
+    setTimeout(() => {
+      loader.style.visibility = 'hidden';
+      contents.style.visibility = 'visible';
+    }, 500);
+  }
+};
 
 // Create scene
 const scene = new THREE.Scene();
@@ -18,7 +46,7 @@ const camera = new THREE.PerspectiveCamera(
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector('#canvas-background'),
+  canvas,
 });
 
 // Controls
@@ -30,41 +58,39 @@ camera.position.setX(-3);
 // Draw
 renderer.render(scene, camera);
 
-// Background
-const isBackground = false; // (optional)
-const spaceTexture = new THREE.TextureLoader().load('/images/space.jpg');
-if (isBackground) {
-  scene.background = spaceTexture;
-}
-
 // Create Torus
-const geometry = new THREE.TorusGeometry(10, 2, 40, 100);
+const geometry = new THREE.TorusGeometry(15, 2, 20, 100);
 const material = new THREE.MeshStandardMaterial({
-  color: TORUS_COLOR,
+  color: getRandomColor(),
   wireframe: true,
 });
 const torus = new THREE.Mesh(geometry, material);
 
 // Setup Lights
-const pointLight = new THREE.PointLight(STAR_COLOR);
+const pointLight = new THREE.PointLight(LIGHT_COLOR);
 pointLight.position.set(5, 5, 5);
-const ambientLight = new THREE.AmbientLight(STAR_COLOR);
+const ambientLight = new THREE.AmbientLight(LIGHT_COLOR);
 
 // Create Stars
 const createStarObject = () => {
   const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-  const material = new THREE.MeshStandardMaterial({ color: STAR_COLOR });
+  const material = new THREE.MeshStandardMaterial({
+    color: getRandomColor(),
+  });
   const star = new THREE.Mesh(geometry, material);
 
-  const [x, y, z] = Array(3)
+  const numOfValues = 3;
+  const rangeOfValues = 175;
+
+  const randomValues = Array(numOfValues)
     .fill()
-    .map(() => THREE.MathUtils.randFloatSpread(100));
+    .map(() => THREE.MathUtils.randFloatSpread(rangeOfValues));
+
+  const [x, y, z] = randomValues;
 
   star.position.set(x, y, z);
   scene.add(star);
 };
-
-Array(600).fill().forEach(createStarObject);
 
 // JavaScript Object
 const javascriptTexture = new THREE.TextureLoader().load(
@@ -78,7 +104,7 @@ const javascript = new THREE.Mesh(
 // Moon Object
 const moonTexture = new THREE.TextureLoader().load('./images/moon.jpg');
 const moon = new THREE.Mesh(
-  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.SphereGeometry(2.5, 50, 50),
   new THREE.MeshStandardMaterial({
     map: moonTexture,
   })
@@ -86,37 +112,34 @@ const moon = new THREE.Mesh(
 
 // Move Camera (on scroll)
 const moveCamera = () => {
-  const t = document.body.getBoundingClientRect().top;
-  moon.rotation.x += 0.05;
-  moon.rotation.y += 0.075;
-  moon.rotation.z += 0.05;
+  // Get the top of the page
+  const topOfThePage = document.body.getBoundingClientRect().top;
+  moon.rotation.x += 0.005;
+  moon.rotation.y += 0.005;
+  moon.rotation.z += 0.005;
   javascript.rotation.z += 0.01;
   javascript.rotation.x += 0.01;
-  camera.position.z = t * -0.01;
-  camera.position.x = t * -0.0002;
-  camera.rotation.y = t * -0.0002;
+  camera.position.z = topOfThePage * -0.011;
+  camera.position.x = topOfThePage * -0.0002;
+  camera.rotation.y = topOfThePage * -0.0002;
 };
 
 // Animation Loop
 const animateScene = () => {
   requestAnimationFrame(animateScene);
-  torus.rotation.x += 0.01;
-  torus.rotation.y += 0.005;
-  torus.rotation.z += 0.01;
+  torus.rotation.x += 0.003;
+  torus.rotation.y += 0.003;
+  torus.rotation.z += 0.003;
   javascript.rotation.x += 0.001;
   javascript.rotation.y += 0.001;
   javascript.rotation.z += 0.001;
-  moon.rotation.x += 0.0001;
+  moon.rotation.x += 0.005;
   renderer.render(scene, camera);
 };
 
-// Call our functions
-document.body.onscroll = moveCamera;
-moveCamera();
-animateScene();
-
 // Additional Positioning
-moon.position.z = 30;
+torus.position.z = 0;
+moon.position.z = 40;
 moon.position.setX(-10);
 javascript.position.z = -5;
 javascript.position.x = 2;
@@ -127,3 +150,13 @@ scene.add(pointLight);
 scene.add(ambientLight);
 scene.add(javascript);
 scene.add(moon);
+
+// Call our functions
+document.body.onscroll = moveCamera;
+moveCamera();
+animateScene();
+
+// Create stars
+Array(1000)
+  .fill()
+  .forEach(() => createStarObject());
