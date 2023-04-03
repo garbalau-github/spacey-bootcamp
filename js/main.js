@@ -5,7 +5,7 @@ import { LIGHT_COLOR } from './constants/index.js';
 const contents = document.querySelector('#contents');
 const loader = document.querySelector('#load');
 const canvas = document.querySelector('#canvas-background');
-const button = document.querySelector('button');
+const button = document.querySelector('#toggle-space');
 
 // Background Setup
 let isBackground = false;
@@ -38,7 +38,7 @@ const scene = new THREE.Scene();
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
-  60,
+  50,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -157,6 +157,6 @@ moveCamera();
 animateScene();
 
 // Create stars
-Array(1000)
+Array(1500)
   .fill()
   .forEach(() => createStarObject());
